@@ -1,49 +1,93 @@
 /* style.css */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap'); /* 引入思源黑体 */
+
 body {
-    font-family: Arial, sans-serif; /* 设置页面字体 */
-    display: flex; /* 使用flex布局，方便居中 */
-    flex-direction: column; /* 子元素垂直排列 */
-    align-items: center; /* 水平居中对齐 */
-    margin-top: 20px; /* 顶部外边距 */
-    background-color: #f0f0f0; /* 页面背景色 */
+    font-family: 'Noto Sans SC', Arial, sans-serif; /* 设置页面字体，优先使用思源黑体 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0; /* 移除默认边距 */
+    padding-top: 30px; /* 顶部内边距 */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* 添加渐变背景 */
+    color: #fff; /* 默认文字颜色改为白色以适应深色背景 */
+    min-height: 100vh; /* 确保背景至少覆盖整个视口高度 */
+    box-sizing: border-box;
 }
 
 h1 {
-    color: #333; /* 标题颜色 */
+    color: #fff; /* 标题颜色 */
+    font-size: 3em; /* 增大标题字号 */
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3); /* 给标题添加文字阴影 */
+    margin-bottom: 20px; /* 标题下方边距 */
 }
 
 #gameCanvas {
-    border: 3px solid #333; /* 画布边框 */
-    background-color: #fff; /* 画布背景色，虽然JS中也会设置，这里作为默认 */
-    box-shadow: 5px 5px 10px rgba(0,0,0,0.1); /* 给画布添加一点阴影效果 */
+    border: 5px solid #fff; /* 画布边框改为白色，并加粗 */
+    background-color: rgba(255, 255, 255, 0.1); /* 画布背景色，带透明度 */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2), 0 5px 10px rgba(0,0,0,0.15); /* 更新阴影效果，使其更柔和 */
+    border-radius: 10px; /* 给画布添加圆角 */
 }
 
-div {
-    margin-top: 20px; /* UI元素区域的顶部外边距 */
-    display: flex; /* 内部元素也用flex布局 */
-    align-items: center; /* 垂直居中对齐（相对于此div） */
+.controls { /* 给控制区域的 div 添加一个类名，方便选择 */
+    margin-top: 30px;
+    display: flex;
+    align-items: center;
+    background-color: rgba(0,0,0,0.2); /* 给控制区域添加半透明背景 */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
 #startButton {
-    padding: 10px 20px; /* 按钮内边距 */
-    font-size: 16px; /* 按钮字体大小 */
-    color: white; /* 按钮文字颜色 */
-    background-color: #4CAF50; /* 按钮背景色 */
-    border: none; /* 无边框 */
-    border-radius: 5px; /* 圆角边框 */
-    cursor: pointer; /* 鼠标悬停时显示手型光标 */
-    margin-right: 20px; /* 按钮右侧外边距，与分数分隔开 */
+    padding: 12px 25px;
+    font-size: 18px;
+    color: #fff;
+    background-color: #ff6b6b; /* 按钮颜色改为更有活力的红色 */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 25px;
+    transition: background-color 0.3s ease, transform 0.2s ease; /* 添加过渡动画 */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 #startButton:hover {
-    background-color: #45a049; /* 鼠标悬停时按钮背景色加深 */
+    background-color: #ff4757; /* 鼠标悬停时按钮背景色加深 */
+    transform: translateY(-2px); /* 鼠标悬停时按钮轻微上移 */
+}
+
+#startButton:active {
+    transform: translateY(0px); /* 按钮按下时恢复原位 */
+    background-color: #e05560;
 }
 
 p {
-    font-size: 18px; /* 分数文本字体大小 */
-    color: #333; /* 分数文本颜色 */
+    font-size: 20px; /* 分数文本字体大小 */
+    color: #fff; /* 分数文本颜色 */
+    margin: 0; /* 移除p标签默认的margin */
 }
 
 #score {
-    font-weight: bold; /* 分数数字加粗 */
+    font-weight: bold;
+    margin-left: 8px; /* 分数数字与标签间距 */
+    color: #feca57; /* 分数数字颜色高亮 */
+}
+
+/* 响应式设计：针对小屏幕调整 */
+@media (max-width: 480px) {
+    h1 {
+        font-size: 2.5em;
+    }
+    #gameCanvas {
+        width: 90%; /* 画布宽度自适应 */
+        height: auto; /* 高度自动，保持比例 (JS中设置的宽高比) */
+    }
+    .controls {
+        flex-direction: column; /* 小屏幕上控制元素垂直排列 */
+        padding: 15px;
+    }
+    #startButton {
+        margin-right: 0;
+        margin-bottom: 15px; /* 开始按钮下方增加间距 */
+    }
 }

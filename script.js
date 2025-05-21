@@ -33,38 +33,68 @@ let gameLoopId;
 
 // 主游戏循环
 function mainGameLoop() {
-    if (!gameRunning) return; // 如果游戏未运行，则退出循环
+    // 首先检查 gameRunning 状态，如果已经是 false，说明游戏结束逻辑已处理或正在处理，直接返回
+    if (!gameRunning) {
+        // 如果 gameLoopId 还存在，清除它以确保不会再调用 mainGameLoop
+        // 这可以处理一种边缘情况：在 checkGameOver 之后，但在 clearInterval 之前，又一次循环被触发
+        if (gameLoopId) {
+            clearInterval(gameLoopId);
+            gameLoopId = null; // Explicitly set to null after clearing
+        }
+        return;
+    }
 
-    // 延迟执行，以确保蛇在游戏开始后才移动
+    // 延迟执行，以确保蛇在游戏开始后才移动 (这个setTimeout控制实际的“帧率”或蛇的移动速度)
+    // 注意：这个setTimeout本身不会导致多次弹窗，问题在于 setInterval 和 gameRunning 状态的管理
     setTimeout(() => {
+        // 在 setTimeout 回调开始时再次检查 gameRunning
+        // 这是因为从 mainGameLoop 开始到 setTimeout 回调执行之间，状态可能已经改变
+        if (!gameRunning) {
+            // If game stopped while timeout was pending, ensure loop ID is also cleared if not already
+            if (gameLoopId) {
+                clearInterval(gameLoopId);
+                gameLoopId = null;
+            }
+            return;
+        }
+
         clearCanvas(); // 清除画布
-        moveSnake();   // 移动蛇
+        moveSnake();   // 移动蛇 (如果移动导致游戏结束，checkGameOver会发现)
         drawGame();    // 绘制游戏元素
 
         // 检查游戏结束条件
         if (checkGameOver()) {
-            gameRunning = false;
-            clearInterval(gameLoopId); // 清除游戏循环
+            // 关键：在执行游戏结束逻辑之前，立即设置 gameRunning 为 false
+            gameRunning = false; // 防止后续的循环或此回调中的代码再次触发游戏结束逻辑
+            
+            clearInterval(gameLoopId); // 清除 setInterval，停止新的 mainGameLoop 调用
+            gameLoopId = null; // 将 gameLoopId 设置为 null，表示循环已停止
+
             alert("游戏结束! 你的分数是: " + score); // 弹出游戏结束提示
-            return; // 退出函数，不再继续游戏循环
+            // 此时因为 gameRunning 是 false, mainGameLoop 的开头和 setTimeout 回调的开头都会直接返回，
+            // 不会再执行游戏逻辑或再次调用 checkGameOver
+            return; // 从 setTimeout 回调中返回
         }
-    }, 100); // 这里的100ms是蛇移动的间隔，可以调整以改变速度
+    }, 150); // 蛇移动的间隔，可以调整以改变速度 (从100ms增加到150ms，使蛇变慢)
 }
 
 
 // 清除画布
 function clearCanvas() {
-    ctx.fillStyle = 'white'; // 设置背景色
+    // 使用 style.css 中定义的 body 背景色作为画布的 "清除" 色，或者用一个接近的 RGBA 值
+    // ctx.fillStyle = 'rgba(102, 126, 234, 0.1)'; // Example, if background is #667eea, adjust for transparency
+    // For simplicity, using the canvas background from style.css
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)'; // 画布背景色，带透明度 (from style.css #gameCanvas)
     ctx.fillRect(0, 0, canvas.width, canvas.height); // 填充整个画布
 }
 
 // 移动蛇的逻辑
 function moveSnake() {
-    // 根据当前方向(dx, dy)计算蛇头的新位置
+    if (!gameRunning) return; // 如果游戏结束，则不移动
+
     const head = { x: snake[0].x + dx, y: snake[0].y + dy };
     snake.unshift(head); // 将新蛇头添加到蛇身体数组的头部
 
-    // 检查蛇是否吃到食物
     if (head.x === food.x && head.y === food.y) {
         score++; // 分数增加
         scoreDisplay.textContent = score; // 更新分数显示
@@ -77,28 +107,37 @@ function moveSnake() {
 // 绘制游戏元素（蛇和食物）
 function drawGame() {
     // 绘制蛇
-    ctx.fillStyle = 'green'; // 设置蛇的颜色
+    ctx.fillStyle = '#6ab04c'; // 更鲜亮的绿色 (Updated color)
     snake.forEach(segment => {
-        ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 2, gridSize - 2); // 绘制蛇的每一节，-2是为了格子间的空隙
+        ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 1, gridSize - 1); // 微调大小留出缝隙 (Updated size)
     });
 
     // 绘制食物
-    ctx.fillStyle = 'red'; // 设置食物的颜色
-    ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 2, gridSize - 2); // 绘制食物
+    ctx.fillStyle = '#ff6b6b'; // 与按钮颜色一致或近似 (Updated color)
+    ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 1, gridSize - 1); // (Updated size)
 }
 
 // 检查游戏是否结束
 function checkGameOver() {
+    // 如果游戏已经标记为结束 (gameRunning is false)，则直接返回true
+    // This check is crucial. If gameRunning became false due to conditions in mainGameLoop's setTimeout,
+    // this ensures checkGameOver immediately reflects that, preventing re-evaluation.
+    if (!gameRunning) {
+        return true;
+    }
+
     const head = snake[0];
 
     // 检查是否撞墙
     if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
+        // gameRunning = false; // Set gameRunning to false here as well or rely on mainGameLoop to do it
         return true; // 撞墙，游戏结束
     }
 
     // 检查是否撞到自己
     for (let i = 1; i < snake.length; i++) {
         if (snake[i].x === head.x && snake[i].y === head.y) {
+            // gameRunning = false; // Set gameRunning to false here as well
             return true; // 撞到自己，游戏结束
         }
     }
@@ -111,11 +150,12 @@ function placeFood() {
     food.y = Math.floor(Math.random() * tileCount);
 
     // 确保食物不会生成在蛇身上
-    snake.forEach(segment => {
+    for (const segment of snake) { // Changed from forEach to a for...of for easier return from recursive call
         if (segment.x === food.x && segment.y === food.y) {
             placeFood(); // 如果位置重叠，重新生成食物
+            return; // Crucial: exit current call after recursion
         }
-    });
+    }
 }
 
 // 初始化游戏或重置游戏
@@ -123,26 +163,37 @@ function initializeGame() {
     snake = [{ x: 10, y: 10 }];
     dx = 0; // 初始不移动，等待用户按键
     dy = 0;
-    placeFood();
     score = 0;
     scoreDisplay.textContent = score;
-    gameRunning = true;
+    
+    // 关键: 在启动新的游戏循环之前，确保旧的已完全停止
+    if (gameLoopId) {
+        clearInterval(gameLoopId);
+        gameLoopId = null;
+    }
+    // gameRunning = false; // Set to false before placing food and other setup
 
-    if (gameLoopId) clearInterval(gameLoopId); // 清除之前的游戏循环
-    // 设置新的游戏循环。注意：mainGameLoop 内部通过 setTimeout 控制实际的蛇移动速度。
-    // 此处的 setInterval 调用 mainGameLoop 的频率可以比蛇的实际移动频率高，以确保按键响应等及时处理。
-    // 例如，蛇每100ms移动一次，但我们可以每50ms调用一次mainGameLoop来检查状态和准备下一次移动。
-    gameLoopId = setInterval(mainGameLoop, 50); // 此处50ms是为了更快的逻辑更新循环，实际蛇移动速度由mainGameLoop内的setTimeout控制
+    placeFood(); // 放置食物要在蛇初始化之后
 
-    drawGame(); // 初始绘制
+    gameRunning = true; // 现在可以安全地设置为 true
+    
+    // 启动游戏循环
+    gameLoopId = setInterval(mainGameLoop, 50); // 这个50ms是检查是否要执行下一帧的频率
+
+    // 初始绘制画布和游戏元素 (call after gameRunning is true and loop is set)
+    clearCanvas(); 
+    drawGame(); 
 }
 
 // --- 事件监听器 ---
-
-// 监听键盘按键事件，控制蛇的移动方向
 document.addEventListener('keydown', (event) => {
-    // 阻止蛇立即反向移动
-    // 例如，如果蛇正在向右移动 (dx=1, dy=0)，则不能立即向左移动
+    // Only process arrow keys if the game is running
+    if (!gameRunning && event.key.startsWith("Arrow")) {
+        return; // Do not change direction if game is not running
+    }
+    // If game is not running and it's not an arrow key, do nothing specific here.
+    // (e.g. if we had a pause key, it might be handled differently)
+
     switch (event.key) {
         case 'ArrowUp':
             if (dy === 0) { // 只有当蛇不是垂直移动时，才允许向上
@@ -175,5 +226,5 @@ startButton.addEventListener('click', initializeGame);
 
 // 初始绘制（游戏开始前）
 // 在initializeGame被调用前，先画一次初始状态
-clearCanvas(); // 清除一下，避免重复绘制
-drawGame(); // 绘制蛇和食物的初始位置
+clearCanvas(); 
+drawGame();
