@@ -1,24 +1,41 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8"> <!-- 设置字符编码为UTF-8 -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- 设置视口，用于响应式设计 -->
-    <title>贪吃蛇</title> <!-- 页面标题 -->
-    <link rel="stylesheet" href="style.css"> <!-- 引入外部CSS样式文件 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>贪吃蛇</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>贪吃蛇</h1> <!-- 游戏主标题 -->
+    <h1>贪吃蛇</h1>
 
-    <!-- 游戏画布，所有的游戏图形都将在这里绘制 -->
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
-
-    <!-- 包含游戏控制按钮和分数显示的区域 -->
-    <div class="controls">
-        <button id="startButton">开始游戏</button> <!-- 开始/重新开始游戏按钮 -->
-        <p>分数: <span id="score">0</span></p> <!-- 显示当前得分 -->
-        <p style="margin-left: 20px;">长度: <span id="length">1</span></p> <!-- 新增的长度显示 -->
+    <div id="settingsPanel">
+        <h2>游戏设置</h2>
+        <div>
+            <label for="initialLength">初始长度 (1-10):</label>
+            <input type="number" id="initialLength" name="initialLength" value="3" min="1" max="10">
+        </div>
+        <div>
+            <p>选择速度:</p>
+            <input type="radio" id="speedSlow" name="speed" value="slow" checked>
+            <label for="speedSlow">慢</label>
+            <input type="radio" id="speedMedium" name="speed" value="medium">
+            <label for="speedMedium">中</label>
+            <input type="radio" id="speedFast" name="speed" value="fast">
+            <label for="speedFast">快</label>
+        </div>
+        <button id="startGameButton">开始游戏</button> <!-- Renamed for clarity from startButton -->
     </div>
 
-    <script src="script.js"></script> <!-- 引入外部JavaScript游戏逻辑文件 -->
+    <div id="gameArea" style="display: none;"> <!-- Game area initially hidden -->
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <div class="controls">
+            <!-- The original start button is removed from here, game started by new button -->
+            <p>分数: <span id="score">0</span></p>
+            <p style="margin-left: 20px;">长度: <span id="length">1</span></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
