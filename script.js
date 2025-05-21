@@ -5,6 +5,7 @@ const ctx = canvas.getContext('2d');
 // 获取DOM元素
 const startButton = document.getElementById('startButton');
 const scoreDisplay = document.getElementById('score');
+const lengthDisplay = document.getElementById('length'); // 获取长度显示元素
 
 // 游戏参数
 const gridSize = 20; // 游戏区域中每个格子的大小
@@ -75,7 +76,7 @@ function mainGameLoop() {
             // 不会再执行游戏逻辑或再次调用 checkGameOver
             return; // 从 setTimeout 回调中返回
         }
-    }, 250); // 蛇移动的间隔，可以调整以改变速度 (从150ms增加到250ms，使蛇更慢)
+    }, 350); // 蛇移动的间隔，可以调整以改变速度 (从250ms增加到350ms，使蛇更慢)
 }
 
 
@@ -112,10 +113,13 @@ function moveSnake() {
     if (head.x === food.x && head.y === food.y) {
         score++; // 分数增加
         scoreDisplay.textContent = score; // 更新分数显示
+        // lengthDisplay.textContent = snake.length; // 长度已经因为unshift增加，placeFood后长度不变
         placeFood(); // 重新放置食物
     } else {
         snake.pop(); // 如果没有吃到食物，则移除蛇尾，保持蛇的长度不变
     }
+    // 更新长度显示 AFTER snake array modification
+    lengthDisplay.textContent = snake.length;
 }
 
 // 绘制游戏元素（蛇和食物）
@@ -169,6 +173,7 @@ function initializeGame() {
     dy = 0;
     score = 0;
     scoreDisplay.textContent = score;
+    lengthDisplay.textContent = snake.length; // 设置初始长度显示
     
     // 关键: 在启动新的游戏循环之前，确保旧的已完全停止
     if (gameLoopId) {
