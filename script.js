@@ -75,7 +75,7 @@ function mainGameLoop() {
             // 不会再执行游戏逻辑或再次调用 checkGameOver
             return; // 从 setTimeout 回调中返回
         }
-    }, 150); // 蛇移动的间隔，可以调整以改变速度 (从100ms增加到150ms，使蛇变慢)
+    }, 250); // 蛇移动的间隔，可以调整以改变速度 (从150ms增加到250ms，使蛇更慢)
 }
 
 
@@ -92,9 +92,23 @@ function clearCanvas() {
 function moveSnake() {
     if (!gameRunning) return; // 如果游戏结束，则不移动
 
-    const head = { x: snake[0].x + dx, y: snake[0].y + dy };
-    snake.unshift(head); // 将新蛇头添加到蛇身体数组的头部
+    let head = { x: snake[0].x + dx, y: snake[0].y + dy };
 
+    // 实现墙壁环绕（穿墙）功能
+    if (head.x >= tileCount) { // 如果蛇头超出右边界
+        head.x = 0; // 从左边界出现
+    } else if (head.x < 0) { // 如果蛇头超出左边界
+        head.x = tileCount - 1; // 从右边界出现
+    }
+    if (head.y >= tileCount) { // 如果蛇头超出下边界
+        head.y = 0; // 从上边界出现
+    } else if (head.y < 0) { // 如果蛇头超出上边界
+        head.y = tileCount - 1; // 从下边界出现
+    }
+
+    snake.unshift(head); // 将（可能已调整过位置的）新蛇头添加到蛇的身体数组的头部
+
+    // 检查蛇是否吃到食物
     if (head.x === food.x && head.y === food.y) {
         score++; // 分数增加
         scoreDisplay.textContent = score; // 更新分数显示
@@ -119,29 +133,19 @@ function drawGame() {
 
 // 检查游戏是否结束
 function checkGameOver() {
-    // 如果游戏已经标记为结束 (gameRunning is false)，则直接返回true
-    // This check is crucial. If gameRunning became false due to conditions in mainGameLoop's setTimeout,
-    // this ensures checkGameOver immediately reflects that, preventing re-evaluation.
-    if (!gameRunning) {
-        return true;
-    }
+    // 如果游戏已经标记为结束 (gameRunning is false)，则直接返回true，避免不必要的检查或逻辑
+    if (!gameRunning) return true;
 
     const head = snake[0];
 
-    // 检查是否撞墙
-    if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
-        // gameRunning = false; // Set gameRunning to false here as well or rely on mainGameLoop to do it
-        return true; // 撞墙，游戏结束
-    }
-
     // 检查是否撞到自己
+    // 从索引1开始遍历蛇的身体（不包括蛇头），检查是否有任何一节与蛇头位置重合
     for (let i = 1; i < snake.length; i++) {
         if (snake[i].x === head.x && snake[i].y === head.y) {
-            // gameRunning = false; // Set gameRunning to false here as well
             return true; // 撞到自己，游戏结束
         }
     }
-    return false; // 游戏未结束
+    return false; // 游戏未结束 (没有撞到自己)
 }
 
 // 随机放置食物
