@@ -36,9 +36,12 @@ h1 {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    justify-content: center; /* Center items if they don't fill the space */
+    flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+    gap: 10px; /* Add gap between control items for better spacing */
 }
 
-#startButton {
+#startButton { /* This is the old start button, keeping styles for now in case it's reused or for reference */
     padding: 12px 25px;
     font-size: 18px;
     color: #fff;
@@ -46,7 +49,7 @@ h1 {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    margin-right: 25px;
+    margin-right: 25px; /* Will be overridden by .controls > button if that's more specific or !important, but gap is preferred */
     transition: background-color 0.3s ease, transform 0.2s ease; /* 添加过渡动画 */
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
@@ -61,15 +64,15 @@ h1 {
     background-color: #e05560;
 }
 
-p {
+p { /* This general p styling might affect p tags in settingsPanel too. Fine for now. */
     font-size: 20px; /* 分数文本字体大小 */
     color: #fff; /* 分数文本颜色 */
-    margin: 0; /* 移除p标签默认的margin */
+    margin: 0; /* 移除p标签默认的margin for those in .controls or globally if intended */
 }
 
 #score {
     font-weight: bold;
-    margin-left: 8px; /* 分数数字与标签间距 */
+    margin-left: 8px; /*分数数字与标签间距. Gap in .controls might make this redundant for direct children. */
     color: #feca57; /* 分数数字颜色高亮 */
 }
 
@@ -85,10 +88,17 @@ p {
     .controls {
         flex-direction: column; /* 小屏幕上控制元素垂直排列 */
         padding: 15px;
+        /* gap will still apply for vertical spacing here */
     }
-    #startButton {
+    #startButton { /* Old start button responsive */
         margin-right: 0;
         margin-bottom: 15px; /* 开始按钮下方增加间距 */
+    }
+    /* Responsive adjustments for new buttons if needed */
+    .controls button {
+        width: calc(50% - 5px); /* Example: make buttons take half width minus gap, if two per row is desired */
+        /* Or width: 100%; if stacking in column layout */
+        /* For now, let flex-wrap handle it with their intrinsic sizes + padding */
     }
 }
 
@@ -145,7 +155,7 @@ p {
     margin-right: 15px; /* Space out radio button options */
 }
 
-#startGameButton { /* Style the new start button */
+#startGameButton { /* Style the new start button in settings */
     display: block; /* Make it a block to center it */
     width: 100%;
     padding: 12px 25px;
@@ -175,4 +185,42 @@ p {
     display: none; /* Will be changed to flex or block by JS */
     flex-direction: column;
     align-items: center;
+}
+
+/* Styling for buttons within the game controls area */
+.controls button { /* Target all buttons within .controls for common styling */
+    padding: 8px 15px; /* Slightly smaller padding than the main start button */
+    font-size: 14px;   /* Slightly smaller font size */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    /* margin-left is handled by gap in .controls or inline style for now */
+}
+
+.controls button:hover {
+    transform: translateY(-1px); /* Slight lift on hover */
+}
+
+.controls button:active {
+    transform: translateY(0px); /* Press down effect */
+}
+
+#pauseButton {
+    background-color: #ffc107; /* Yellow for pause/warning */
+    color: #333; /* Darker text for yellow background */
+}
+
+#pauseButton:hover {
+    background-color: #e0a800;
+}
+
+#restartButton {
+    background-color: #17a2b8; /* Info/blue for restart */
+}
+
+#restartButton:hover {
+    background-color: #138496;
 }

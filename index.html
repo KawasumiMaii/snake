@@ -24,15 +24,16 @@
             <input type="radio" id="speedFast" name="speed" value="fast">
             <label for="speedFast">快</label>
         </div>
-        <button id="startGameButton">开始游戏</button> <!-- Renamed for clarity from startButton -->
+        <button id="startGameButton">开始游戏</button>
     </div>
 
     <div id="gameArea" style="display: none;"> <!-- Game area initially hidden -->
         <canvas id="gameCanvas" width="400" height="400"></canvas>
         <div class="controls">
-            <!-- The original start button is removed from here, game started by new button -->
             <p>分数: <span id="score">0</span></p>
             <p style="margin-left: 20px;">长度: <span id="length">1</span></p>
+            <button id="pauseButton" style="margin-left: 20px;">暂停</button>
+            <button id="restartButton" style="margin-left: 10px;">重新开始</button> <!-- New Restart Button -->
         </div>
     </div>
 
