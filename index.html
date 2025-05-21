@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8"> <!-- 设置字符编码为UTF-8 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- 设置视口，用于响应式设计 -->
+    <title>贪吃蛇</title> <!-- 页面标题 -->
+    <link rel="stylesheet" href="style.css"> <!-- 引入外部CSS样式文件 -->
+</head>
+<body>
+    <h1>贪吃蛇</h1> <!-- 游戏主标题 -->
+
+    <!-- 游戏画布，所有的游戏图形都将在这里绘制 -->
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+    <!-- 包含游戏控制按钮和分数显示的区域 -->
+    <div>
+        <button id="startButton">开始游戏</button> <!-- 开始/重新开始游戏按钮 -->
+        <p>分数: <span id="score">0</span></p> <!-- 显示当前得分 -->
+    </div>
+
+    <script src="script.js"></script> <!-- 引入外部JavaScript游戏逻辑文件 -->
+</body>
+</html>

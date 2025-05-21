@@ -1,0 +1,49 @@
+/* style.css */
+body {
+    font-family: Arial, sans-serif; /* 设置页面字体 */
+    display: flex; /* 使用flex布局，方便居中 */
+    flex-direction: column; /* 子元素垂直排列 */
+    align-items: center; /* 水平居中对齐 */
+    margin-top: 20px; /* 顶部外边距 */
+    background-color: #f0f0f0; /* 页面背景色 */
+}
+
+h1 {
+    color: #333; /* 标题颜色 */
+}
+
+#gameCanvas {
+    border: 3px solid #333; /* 画布边框 */
+    background-color: #fff; /* 画布背景色，虽然JS中也会设置，这里作为默认 */
+    box-shadow: 5px 5px 10px rgba(0,0,0,0.1); /* 给画布添加一点阴影效果 */
+}
+
+div {
+    margin-top: 20px; /* UI元素区域的顶部外边距 */
+    display: flex; /* 内部元素也用flex布局 */
+    align-items: center; /* 垂直居中对齐（相对于此div） */
+}
+
+#startButton {
+    padding: 10px 20px; /* 按钮内边距 */
+    font-size: 16px; /* 按钮字体大小 */
+    color: white; /* 按钮文字颜色 */
+    background-color: #4CAF50; /* 按钮背景色 */
+    border: none; /* 无边框 */
+    border-radius: 5px; /* 圆角边框 */
+    cursor: pointer; /* 鼠标悬停时显示手型光标 */
+    margin-right: 20px; /* 按钮右侧外边距，与分数分隔开 */
+}
+
+#startButton:hover {
+    background-color: #45a049; /* 鼠标悬停时按钮背景色加深 */
+}
+
+p {
+    font-size: 18px; /* 分数文本字体大小 */
+    color: #333; /* 分数文本颜色 */
+}
+
+#score {
+    font-weight: bold; /* 分数数字加粗 */
+}
