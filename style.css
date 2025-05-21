@@ -160,19 +160,22 @@ p { /* This general p styling might affect p tags in settingsPanel too. Fine for
     width: 100%;
     padding: 12px 25px;
     font-size: 18px;
+    font-weight: bold; /* Make text bolder */
     color: #fff;
     background-color: #28a745; /* A different green for "confirm and start" */
     border: none;
+    /* border: 2px solid #1f7a34; */ /* Optional: Add a slightly darker border */
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; /* Add box-shadow transition */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.25), 0 2px 3px rgba(0,0,0,0.15); /* More pronounced shadow */
     margin-top: 10px; /* Add some space above the button */
 }
 
 #startGameButton:hover {
     background-color: #218838;
     transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3), 0 3px 5px rgba(0,0,0,0.2); /* Enhanced shadow on hover */
 }
 
 #startGameButton:active {

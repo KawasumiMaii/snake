@@ -38,7 +38,7 @@ let gameRunning = false;
 let gameLoopTimeoutId = null; 
 
 // 当前游戏速度的延迟值
-let currentSpeedDelay = 350; // Default to slow
+let currentSpeedDelay = 350; // Default to slow (reflecting new default)
 
 // 保存上次使用的游戏设置
 let lastUsedLength = 3; 
@@ -74,12 +74,19 @@ function mainGameLoop() {
     }
 
     // Schedule the next execution of mainGameLoop
-    // console.log("[mainGameLoop] Scheduling next step with currentSpeedDelay:", currentSpeedDelay); // REMOVED
     gameLoopTimeoutId = setTimeout(mainGameLoop, currentSpeedDelay);
 }
 
 function clearCanvas() {
-    ctx.fillStyle = '#2c3e50';
+    const gradient = ctx.createRadialGradient(
+        canvas.width / 2, canvas.height / 2, Math.min(canvas.width, canvas.height) * 0.1, // Inner circle (center, radius)
+        canvas.width / 2, canvas.height / 2, Math.max(canvas.width, canvas.height) * 0.7  // Outer circle (center, radius)
+    );
+    // A subtle gradient from a slightly lighter center to the existing dark color
+    gradient.addColorStop(0, '#34495e'); // Slightly lighter than #2c3e50
+    gradient.addColorStop(1, '#2c3e50'); // Existing dark background color
+
+    ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
@@ -124,13 +131,65 @@ function moveSnake() {
 
 
 function drawGame() {
+    // 绘制蛇
+    const segmentSize = gridSize - 1; // Size of the segment block
+    const borderThickness = 2; // Thickness of the border, adjust as needed
+    // Ensure innerSize is not negative if borderThickness is large or gridSize is small
+    const innerSize = Math.max(0, segmentSize - (borderThickness * 2)); 
+
     snake.forEach((segment, index) => {
-        ctx.fillStyle = (index === 0) ? '#76ff03' : '#4caf50';
-        ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 1, gridSize - 1);
+        let fillStyle;
+        let borderStyle;
+
+        if (index === 0) {
+            fillStyle = '#76ff03';   // Head fill: lime green
+            borderStyle = '#5a9e02'; // Darker lime green for head border
+        } else {
+            fillStyle = '#4caf50';   // Body fill: medium green
+            borderStyle = '#388e3c'; // Darker medium green for body border
+        }
+
+        const segX = segment.x * gridSize;
+        const segY = segment.y * gridSize;
+
+        // 1. Draw the outer border/background rectangle
+        ctx.fillStyle = borderStyle;
+        ctx.fillRect(segX, segY, segmentSize, segmentSize);
+
+        // 2. Draw the inner fill rectangle, inset from the border
+        ctx.fillStyle = fillStyle;
+        ctx.fillRect(
+            segX + borderThickness, 
+            segY + borderThickness, 
+            innerSize, 
+            innerSize
+        );
     });
-    ctx.fillStyle = '#ff6b6b';
-    ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize - 1, gridSize - 1);
+
+    // 绘制食物 (圆形 "苹果") - This part remains unchanged
+    const foodRadius = (gridSize - 2) / 2; 
+    const foodX = food.x * gridSize + gridSize / 2; 
+    const foodY = food.y * gridSize + gridSize / 2; 
+
+    ctx.fillStyle = '#e74c3c'; 
+    ctx.beginPath();
+    ctx.arc(foodX, foodY, foodRadius, 0, Math.PI * 2); 
+    ctx.fill();
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'; 
+    ctx.beginPath();
+    ctx.arc(foodX - foodRadius * 0.3, foodY - foodRadius * 0.3, foodRadius * 0.4, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.beginPath();
+    ctx.moveTo(foodX, foodY - foodRadius); 
+    ctx.lineTo(foodX + 1, foodY - foodRadius - gridSize * 0.2); 
+    ctx.lineWidth = gridSize * 0.1; 
+    ctx.strokeStyle = '#7f4f24'; 
+    ctx.stroke();
+    ctx.lineWidth = 1; 
 }
+
 
 function checkGameOver() {
     const head = snake[0];
@@ -159,20 +218,22 @@ function initializeGame(initialLength, speedSetting, growthFactor) {
         clearTimeout(gameLoopTimeoutId);
         gameLoopTimeoutId = null;
     }
-    // console.log("[initializeGame] Received speedSetting:", speedSetting); // REMOVED
     
     currentGrowthFactor = growthFactor; 
-    // console.log("[initializeGame] Received growthFactor:", growthFactor); // This was duplicated or meant to be currentGrowthFactor
     
     switch (speedSetting) {
-        case 'slow': currentSpeedDelay = 400; break;
-        case 'medium': currentSpeedDelay = 220; break;
-        case 'fast': currentSpeedDelay = 100; break;
-        default: currentSpeedDelay = 400;
+        case 'slow': 
+            currentSpeedDelay = 350; 
+            break;
+        case 'medium': 
+            currentSpeedDelay = 180; 
+            break;
+        case 'fast': 
+            currentSpeedDelay = 75;  
+            break;
+        default: 
+            currentSpeedDelay = 350; 
     }
-    // console.log("[initializeGame] Set currentSpeedDelay to:", currentSpeedDelay); // REMOVED
-    // console.log("[initializeGame] Set currentGrowthFactor to:", currentGrowthFactor); // REMOVED
-
 
     snake = [];
     const startX = Math.floor(tileCount / 2);
