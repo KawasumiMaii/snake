@@ -34,8 +34,8 @@ let score = 0;
 // 游戏是否正在进行 (也用于暂停状态)
 let gameRunning = false;
 
-// 主游戏循环的ID
-let gameLoopId;
+// 主游戏循环的Timeout ID
+let gameLoopTimeoutId = null; 
 
 // 当前游戏速度的延迟值
 let currentSpeedDelay = 350; // Default to slow
@@ -52,40 +52,30 @@ let currentGrowthFactor = 1; // New global for current game
 
 function mainGameLoop() {
     if (!gameRunning) {
-        if (gameLoopId) {
-            clearInterval(gameLoopId);
-            gameLoopId = null; 
+        if (gameLoopTimeoutId) {
+            clearTimeout(gameLoopTimeoutId);
+            gameLoopTimeoutId = null;
         }
         return;
     }
 
-    console.log("[mainGameLoop] Scheduling step with currentSpeedDelay:", currentSpeedDelay); 
+    // Game logic for one step
+    clearCanvas();
+    moveSnake();
+    drawGame();
 
-    setTimeout(() => {
-        if (!gameRunning) { 
-            if (gameLoopId) { 
-                clearInterval(gameLoopId); 
-                gameLoopId = null;
-            }
-            return;
-        }
-        
-        clearCanvas();
-        moveSnake();
-        drawGame();
+    if (checkGameOver()) {
+        gameRunning = false; 
+        alert("游戏结束! 你的分数是: " + score);
+        settingsPanel.style.display = 'block';
+        gameArea.style.display = 'none';
+        if (pauseButton) pauseButton.textContent = '暂停'; 
+        return; 
+    }
 
-        if (checkGameOver()) {
-            gameRunning = false;
-            if (gameLoopId) { 
-                clearInterval(gameLoopId);
-                gameLoopId = null;
-            }
-            alert("游戏结束! 你的分数是: " + score);
-            settingsPanel.style.display = 'block';
-            gameArea.style.display = 'none';
-            if (pauseButton) pauseButton.textContent = '暂停'; 
-        }
-    }, currentSpeedDelay);
+    // Schedule the next execution of mainGameLoop
+    // console.log("[mainGameLoop] Scheduling next step with currentSpeedDelay:", currentSpeedDelay); // REMOVED
+    gameLoopTimeoutId = setTimeout(mainGameLoop, currentSpeedDelay);
 }
 
 function clearCanvas() {
@@ -96,25 +86,18 @@ function clearCanvas() {
 function moveSnake() {
     if (!gameRunning) return;
 
-    let currentTickDx = dx; // Use current global dx for this tick's movement calculation by default
+    let currentTickDx = dx; 
     let currentTickDy = dy;
 
-    // Check if snake is stationary (global dx, dy are 0) AND its head (snake[0]) is on the food.
-    // This means it's an initialLength=1 snake that hasn't received directional input yet
-    // and is about to "eat" the food placed at its starting location.
     if (dx === 0 && dy === 0 && snake[0].x === food.x && snake[0].y === food.y) {
-        // Snake is stationary and on top of food. Give it a default direction for THIS move.
-        currentTickDx = 1; // Default direction: right for this specific tick's calculation
+        currentTickDx = 1; 
         currentTickDy = 0;
-        // Update global dx/dy as well, so subsequent moves continue in this direction unless a key is pressed.
         dx = currentTickDx;
         dy = currentTickDy;
-        // console.log("Stationary snake eating food, assigned new direction for this tick: dx=1"); // DEBUG
     }
 
     let head = { x: snake[0].x + currentTickDx, y: snake[0].y + currentTickDy };
 
-    // Wall wraparound logic
     if (head.x >= tileCount) head.x = 0;
     else if (head.x < 0) head.x = tileCount - 1;
     if (head.y >= tileCount) head.y = 0;
@@ -122,25 +105,17 @@ function moveSnake() {
 
     snake.unshift(head); 
 
-    // Check if the NEW head position is on the food
     if (head.x === food.x && head.y === food.y) { 
         score++; 
         scoreDisplay.textContent = score;
         
         if (currentGrowthFactor > 1) {
-            // The snake has already moved one step (head unshifted).
-            // The tail was effectively not popped. This is +1 growth.
-            // We need to add (currentGrowthFactor - 1) more segments.
-            // These are added as copies of the segment that is NOW snake[snake.length - 1] (the new tail).
             const tailSegmentToCopy = snake[snake.length - 1]; 
             for (let i = 0; i < currentGrowthFactor - 1; i++) {
                 snake.push({ x: tailSegmentToCopy.x, y: tailSegmentToCopy.y });
             }
         }
-        
         placeFood();
-        // The direction assignment for a stationary snake eating food has already happened *before* this block
-        // when currentTickDx and currentTickDy were determined.
     } else {
         snake.pop(); 
     }
@@ -179,24 +154,25 @@ function placeFood() {
 }
 
 function initializeGame(initialLength, speedSetting, growthFactor) { 
-    gameRunning = false;
-    if (gameLoopId) {
-        clearInterval(gameLoopId);
-        gameLoopId = null;
+    gameRunning = false; 
+    if (gameLoopTimeoutId) { 
+        clearTimeout(gameLoopTimeoutId);
+        gameLoopTimeoutId = null;
     }
-    console.log("[initializeGame] Received speedSetting:", speedSetting); 
-    console.log("[initializeGame] Received growthFactor:", growthFactor); 
-
+    // console.log("[initializeGame] Received speedSetting:", speedSetting); // REMOVED
+    
+    currentGrowthFactor = growthFactor; 
+    // console.log("[initializeGame] Received growthFactor:", growthFactor); // This was duplicated or meant to be currentGrowthFactor
+    
     switch (speedSetting) {
         case 'slow': currentSpeedDelay = 400; break;
         case 'medium': currentSpeedDelay = 220; break;
         case 'fast': currentSpeedDelay = 100; break;
         default: currentSpeedDelay = 400;
     }
-    console.log("[initializeGame] Set currentSpeedDelay to:", currentSpeedDelay); 
+    // console.log("[initializeGame] Set currentSpeedDelay to:", currentSpeedDelay); // REMOVED
+    // console.log("[initializeGame] Set currentGrowthFactor to:", currentGrowthFactor); // REMOVED
 
-    currentGrowthFactor = growthFactor; 
-    console.log("[initializeGame] Set currentGrowthFactor to:", currentGrowthFactor); 
 
     snake = [];
     const startX = Math.floor(tileCount / 2);
@@ -204,28 +180,25 @@ function initializeGame(initialLength, speedSetting, growthFactor) {
     for (let i = 0; i < initialLength; i++) {
         snake.push({ x: startX - i, y: startY });
     }
-    
     dx = 0; 
     dy = 0;
     if(initialLength > 1) {
         dx = 1;
     }
-
     score = 0;
     scoreDisplay.textContent = score;
     lengthDisplay.textContent = snake.length;
-    
     if (pauseButton) {
         pauseButton.textContent = '暂停';
     }
-
+    
     placeFood(); 
 
-    gameRunning = true; 
-    gameLoopId = setInterval(mainGameLoop, 50); 
-
     clearCanvas(); 
-    drawGame();
+    drawGame();    
+
+    gameRunning = true; 
+    mainGameLoop(); 
 }
 
 // --- Event Listeners ---
@@ -260,20 +233,21 @@ startGameButton.addEventListener('click', () => {
 });
 
 pauseButton.addEventListener('click', () => {
-    if (gameRunning) {
-        gameRunning = false;
-        pauseButton.textContent = '继续';
-        if (gameLoopId) {
-            clearInterval(gameLoopId);
-            gameLoopId = null; 
+    if (gameRunning) { 
+        gameRunning = false; 
+        if (gameLoopTimeoutId) {
+            clearTimeout(gameLoopTimeoutId);
+            gameLoopTimeoutId = null;
         }
-    } else {
+        pauseButton.textContent = '继续';
+    } else { 
+        if (settingsPanel.style.display === 'block' || settingsPanel.style.display !== 'none') { 
+            return;
+        }
         if (gameArea.style.display !== 'none') {
             gameRunning = true;
             pauseButton.textContent = '暂停';
-            if (!gameLoopId) { 
-                gameLoopId = setInterval(mainGameLoop, 50); 
-            }
+            mainGameLoop(); 
         }
     }
 });
