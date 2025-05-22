@@ -24,6 +24,9 @@ const tileCount = canvas.width / gridSize;
 let snake = [];
 let dx = 0;
 let dy = 0;
+let nextDx = null; // Buffer for the next intended X direction
+let nextDy = null; // Buffer for the next intended Y direction
+
 
 // 食物初始状态
 let food = { x: 15, y: 15 };
@@ -59,9 +62,22 @@ function mainGameLoop() {
         return;
     }
 
+    // Apply buffered input before moving
+    if (nextDx !== null) { // Check if there's a buffered move
+        // Additional safety check: ensure buffered move is not opposite to current direction
+        // This prevents a quick 180 if input was buffered rapidly before previous move applied.
+        if (!(dx === -nextDx && dx !== 0) && !(dy === -nextDy && dy !== 0)) {
+             dx = nextDx;
+             dy = nextDy;
+             // console.log(`Applied buffered move: dx=${dx}, dy=${dy}`); // Optional debug
+        }
+        nextDx = null; // Clear buffer after applying or discarding
+        nextDy = null;
+    }
+
     // Game logic for one step
     clearCanvas();
-    moveSnake();
+    moveSnake(); // moveSnake will now use the updated dx, dy
     drawGame();
 
     if (checkGameOver()) {
@@ -96,12 +112,19 @@ function moveSnake() {
     let currentTickDx = dx; 
     let currentTickDy = dy;
 
-    if (dx === 0 && dy === 0 && snake[0].x === food.x && snake[0].y === food.y) {
+    // This logic for stationary snake eating food has been simplified because
+    // the main input buffering now handles initial dx/dy changes more smoothly.
+    // If dx/dy are still 0 here, it means no input has been processed yet.
+    // The original fix for stationary snake eating is still relevant if it eats before any key press.
+    if (dx === 0 && dy === 0 && snake.length > 0 && snake[0].x === food.x && snake[0].y === food.y) {
         currentTickDx = 1; 
         currentTickDy = 0;
-        dx = currentTickDx;
+        dx = currentTickDx; // Persist this change
         dy = currentTickDy;
     }
+    
+    // Ensure snake is not empty before trying to access snake[0]
+    if (snake.length === 0) return; // Should not happen in normal gameplay after init
 
     let head = { x: snake[0].x + currentTickDx, y: snake[0].y + currentTickDy };
 
@@ -132,9 +155,8 @@ function moveSnake() {
 
 function drawGame() {
     // 绘制蛇
-    const segmentSize = gridSize - 1; // Size of the segment block
-    const borderThickness = 2; // Thickness of the border, adjust as needed
-    // Ensure innerSize is not negative if borderThickness is large or gridSize is small
+    const segmentSize = gridSize - 1; 
+    const borderThickness = 2; 
     const innerSize = Math.max(0, segmentSize - (borderThickness * 2)); 
 
     snake.forEach((segment, index) => {
@@ -142,21 +164,18 @@ function drawGame() {
         let borderStyle;
 
         if (index === 0) {
-            fillStyle = '#76ff03';   // Head fill: lime green
-            borderStyle = '#5a9e02'; // Darker lime green for head border
+            fillStyle = '#76ff03';   
+            borderStyle = '#5a9e02'; 
         } else {
-            fillStyle = '#4caf50';   // Body fill: medium green
-            borderStyle = '#388e3c'; // Darker medium green for body border
+            fillStyle = '#4caf50';   
+            borderStyle = '#388e3c'; 
         }
 
         const segX = segment.x * gridSize;
         const segY = segment.y * gridSize;
 
-        // 1. Draw the outer border/background rectangle
         ctx.fillStyle = borderStyle;
         ctx.fillRect(segX, segY, segmentSize, segmentSize);
-
-        // 2. Draw the inner fill rectangle, inset from the border
         ctx.fillStyle = fillStyle;
         ctx.fillRect(
             segX + borderThickness, 
@@ -166,7 +185,7 @@ function drawGame() {
         );
     });
 
-    // 绘制食物 (圆形 "苹果") - This part remains unchanged
+    // 绘制食物 (圆形 "苹果")
     const foodRadius = (gridSize - 2) / 2; 
     const foodX = food.x * gridSize + gridSize / 2; 
     const foodY = food.y * gridSize + gridSize / 2; 
@@ -192,6 +211,7 @@ function drawGame() {
 
 
 function checkGameOver() {
+    if (snake.length === 0) return false; // Can't be game over if no snake
     const head = snake[0];
     for (let i = 1; i < snake.length; i++) {
         if (snake[i].x === head.x && snake[i].y === head.y) {
@@ -243,9 +263,13 @@ function initializeGame(initialLength, speedSetting, growthFactor) {
     }
     dx = 0; 
     dy = 0;
+    nextDx = null; // Clear input buffer on new game
+    nextDy = null; 
     if(initialLength > 1) {
-        dx = 1;
+        dx = 1; // Start moving right
+        // nextDx = 1; // Optionally pre-buffer initial move, but dx suffices
     }
+
     score = 0;
     scoreDisplay.textContent = score;
     lengthDisplay.textContent = snake.length;
@@ -321,16 +345,34 @@ restartButton.addEventListener('click', () => {
 });
 
 document.addEventListener('keydown', (event) => {
-    if (!gameRunning && event.key.startsWith("Arrow")) return;
+    if (!gameRunning && event.key.startsWith("Arrow")) return; // Ignore if game not running
 
-    const prevDx = dx;
-    const prevDy = dy;
+    // Temp variables to store the potential next direction
+    let intendedDx = null;
+    let intendedDy = null;
 
     switch (event.key) {
-        case 'ArrowUp': if (prevDy === 0) { dx = 0; dy = -1; } break;
-        case 'ArrowDown': if (prevDy === 0) { dx = 0; dy = 1; } break;
-        case 'ArrowLeft': if (prevDx === 0) { dx = -1; dy = 0; } break;
-        case 'ArrowRight': if (prevDx === 0) { dx = 1; dy = 0; } break;
+        case 'ArrowUp':
+            if (dy === 0) { intendedDx = 0; intendedDy = -1; } // Check against current dy
+            break;
+        case 'ArrowDown':
+            if (dy === 0) { intendedDx = 0; intendedDy = 1; } // Check against current dy
+            break;
+        case 'ArrowLeft':
+            if (dx === 0) { intendedDx = -1; intendedDy = 0; } // Check against current dx
+            break;
+        case 'ArrowRight':
+            if (dx === 0) { intendedDx = 1; intendedDy = 0; } // Check against current dx
+            break;
+        default:
+            return; // Not an arrow key, or no change based on current direction
+    }
+
+    // If a valid new direction was intended, buffer it
+    if (intendedDx !== null) { // Check if intendedDx was set (implies intendedDy was also set)
+        nextDx = intendedDx;
+        nextDy = intendedDy;
+        // console.log(`Buffered next move: dx=${nextDx}, dy=${nextDy}`); // Optional debug
     }
 });
 
