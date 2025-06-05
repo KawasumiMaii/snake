@@ -2,15 +2,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap'); /* 引入思源黑体 */
 
 body {
-    font-family: 'Noto Sans SC', Arial, sans-serif; /* 设置页面字体，优先使用思源黑体 */
+    font-family: 'Noto Sans SC', Arial, sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 0; /* 移除默认边距 */
-    padding-top: 30px; /* 顶部内边距 */
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* 添加渐变背景 */
-    color: #fff; /* 默认文字颜色改为白色以适应深色背景 */
-    min-height: 100vh; /* 确保背景至少覆盖整个视口高度 */
+    margin: 0;
+    padding-top: 30px;
+    /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */ /* Remove old gradient */
+    background-color: #1e2227; /* New solid, very dark desaturated blue/charcoal */
+    color: #fff;
+    min-height: 100vh;
     box-sizing: border-box;
 }
 
@@ -28,52 +29,52 @@ h1 {
     border-radius: 10px; /* 给画布添加圆角 */
 }
 
-.controls { /* 给控制区域的 div 添加一个类名，方便选择 */
+.controls {
     margin-top: 30px;
     display: flex;
     align-items: center;
-    background-color: rgba(0,0,0,0.2); /* 给控制区域添加半透明背景 */
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    justify-content: center; /* Center items if they don't fill the space */
-    flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
-    gap: 10px; /* Add gap between control items for better spacing */
+    background-color: #28313b; /* Same solid color as settingsPanel for consistency */
+    padding: 15px; /* Adjust padding if needed */
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* Consistent subtle shadow */
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 #startButton { /* This is the old start button, keeping styles for now in case it's reused or for reference */
     padding: 12px 25px;
     font-size: 18px;
     color: #fff;
-    background-color: #ff6b6b; /* 按钮颜色改为更有活力的红色 */
+    background-color: #ff6b6b;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    margin-right: 25px; /* Will be overridden by .controls > button if that's more specific or !important, but gap is preferred */
-    transition: background-color 0.3s ease, transform 0.2s ease; /* 添加过渡动画 */
+    margin-right: 25px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 #startButton:hover {
-    background-color: #ff4757; /* 鼠标悬停时按钮背景色加深 */
-    transform: translateY(-2px); /* 鼠标悬停时按钮轻微上移 */
+    background-color: #ff4757;
+    transform: translateY(-2px);
 }
 
 #startButton:active {
-    transform: translateY(0px); /* 按钮按下时恢复原位 */
+    transform: translateY(0px);
     background-color: #e05560;
 }
 
-p { /* This general p styling might affect p tags in settingsPanel too. Fine for now. */
-    font-size: 20px; /* 分数文本字体大小 */
-    color: #fff; /* 分数文本颜色 */
-    margin: 0; /* 移除p标签默认的margin for those in .controls or globally if intended */
+p {
+    font-size: 20px;
+    color: #fff;
+    margin: 0;
 }
 
 #score {
     font-weight: bold;
-    margin-left: 8px; /*分数数字与标签间距. Gap in .controls might make this redundant for direct children. */
-    color: #feca57; /* 分数数字颜色高亮 */
+    margin-left: 8px;
+    color: #feca57;
 }
 
 /* 响应式设计：针对小屏幕调整 */
@@ -82,35 +83,32 @@ p { /* This general p styling might affect p tags in settingsPanel too. Fine for
         font-size: 2.5em;
     }
     #gameCanvas {
-        width: 90%; /* 画布宽度自适应 */
-        height: auto; /* 高度自动，保持比例 (JS中设置的宽高比) */
+        width: 90%;
+        height: auto;
     }
     .controls {
-        flex-direction: column; /* 小屏幕上控制元素垂直排列 */
+        flex-direction: column;
         padding: 15px;
-        /* gap will still apply for vertical spacing here */
     }
-    #startButton { /* Old start button responsive */
+    #startButton {
         margin-right: 0;
-        margin-bottom: 15px; /* 开始按钮下方增加间距 */
+        margin-bottom: 15px;
     }
-    /* Responsive adjustments for new buttons if needed */
     .controls button {
-        width: calc(50% - 5px); /* Example: make buttons take half width minus gap, if two per row is desired */
-        /* Or width: 100%; if stacking in column layout */
-        /* For now, let flex-wrap handle it with their intrinsic sizes + padding */
+        /* width: calc(50% - 5px); // Keep previous responsive logic or adjust if needed */
+        width: 100%; /* For column layout, full width might be better */
     }
 }
 
 /* New styles for settings panel and game area */
 #settingsPanel {
-    background-color: rgba(0,0,0,0.3); /* Semi-transparent background */
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    background-color: #28313b; /* Solid, desaturated dark blue-gray */
+    padding: 25px; /* Slightly more padding */
+    border-radius: 6px; /* Slightly less radius for a sharper look */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15); /* Subtler shadow */
     margin-bottom: 30px;
     width: 100%;
-    max-width: 400px; /* Match canvas width for consistency */
+    max-width: 400px;
     box-sizing: border-box;
 }
 
@@ -124,7 +122,7 @@ p { /* This general p styling might affect p tags in settingsPanel too. Fine for
 
 #settingsPanel div {
     margin-bottom: 15px;
-    display: flex; /* Align label and input nicely */
+    display: flex;
     align-items: center;
 }
 
@@ -133,8 +131,8 @@ p { /* This general p styling might affect p tags in settingsPanel too. Fine for
     margin-right: 10px;
     font-size: 1em;
 }
-#settingsPanel p { /* Specifically for the '选择速度:' text */
-    margin-bottom: 0; /* Reset margin for the paragraph itself */
+#settingsPanel p {
+    margin-bottom: 0;
 }
 
 
@@ -142,40 +140,39 @@ p { /* This general p styling might affect p tags in settingsPanel too. Fine for
     padding: 8px;
     border-radius: 4px;
     border: 1px solid #ccc;
-    width: 60px; /* Adjust width as needed */
-    background-color: #fff; /* Ensure input background is white */
-    color: #333; /* Text color for input */
+    width: 60px;
+    background-color: #fff;
+    color: #333;
 }
 
 #settingsPanel input[type="radio"] {
     margin-right: 5px;
 }
 
-#settingsPanel label[for^="speed"] { /* Labels for radio buttons */
-    margin-right: 15px; /* Space out radio button options */
+#settingsPanel label[for^="speed"] {
+    margin-right: 15px;
 }
 
-#startGameButton { /* Style the new start button in settings */
-    display: block; /* Make it a block to center it */
+#startGameButton {
+    display: block;
     width: 100%;
     padding: 12px 25px;
     font-size: 18px;
-    font-weight: bold; /* Make text bolder */
+    font-weight: bold;
     color: #fff;
-    background-color: #28a745; /* A different green for "confirm and start" */
+    background-color: #28a745;
     border: none;
-    /* border: 2px solid #1f7a34; */ /* Optional: Add a slightly darker border */
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; /* Add box-shadow transition */
-    box-shadow: 0 4px 8px rgba(0,0,0,0.25), 0 2px 3px rgba(0,0,0,0.15); /* More pronounced shadow */
-    margin-top: 10px; /* Add some space above the button */
+    transition: background-color 0.2s ease, transform 0.1s ease; /* Removed box-shadow transition for flatter feel */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Subtler shadow */
+    margin-top: 10px;
 }
 
 #startGameButton:hover {
     background-color: #218838;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.3), 0 3px 5px rgba(0,0,0,0.2); /* Enhanced shadow on hover */
+    transform: translateY(-1px); /* Keep subtle lift */
+    /* box-shadow: 0 3px 6px rgba(0,0,0,0.25); */ /* Optional: even subtler hover shadow or none */
 }
 
 #startGameButton:active {
@@ -185,35 +182,34 @@ p { /* This general p styling might affect p tags in settingsPanel too. Fine for
 
 /* Ensure gameArea takes up space correctly once visible */
 #gameArea {
-    display: none; /* Will be changed to flex or block by JS */
+    display: none;
     flex-direction: column;
     align-items: center;
 }
 
 /* Styling for buttons within the game controls area */
-.controls button { /* Target all buttons within .controls for common styling */
-    padding: 8px 15px; /* Slightly smaller padding than the main start button */
-    font-size: 14px;   /* Slightly smaller font size */
+.controls button {
+    padding: 8px 15px;
+    font-size: 14px;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s ease, transform 0.1s ease;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    /* margin-left is handled by gap in .controls or inline style for now */
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15); /* Even subtler shadow */
 }
 
 .controls button:hover {
-    transform: translateY(-1px); /* Slight lift on hover */
+    transform: translateY(-1px);
 }
 
 .controls button:active {
-    transform: translateY(0px); /* Press down effect */
+    transform: translateY(0px);
 }
 
 #pauseButton {
-    background-color: #ffc107; /* Yellow for pause/warning */
-    color: #333; /* Darker text for yellow background */
+    background-color: #ffc107;
+    color: #333;
 }
 
 #pauseButton:hover {
@@ -221,7 +217,7 @@ p { /* This general p styling might affect p tags in settingsPanel too. Fine for
 }
 
 #restartButton {
-    background-color: #17a2b8; /* Info/blue for restart */
+    background-color: #17a2b8;
 }
 
 #restartButton:hover {
